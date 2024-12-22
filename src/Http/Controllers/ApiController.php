@@ -48,7 +48,6 @@ class ApiController extends Controller
 
     public function index()
     {
-        return 'ijnrfcij';
         // Fetch all results
         $results = $this->query()->with($this->withs)->paginate(10);
 
