@@ -14,8 +14,5 @@
             "email": "edwin.rahmad.toha007@gmail.com"
         }
     ],
-    "require": {
-        "php": "^8.1",
-        "laravel/framework": "^10.0.0"
-    }
+    "require": {}
 }
