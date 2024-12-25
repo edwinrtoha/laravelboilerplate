@@ -10,10 +10,23 @@ class ApiController extends Controller
 {
     var $model = ModelStd::class;
     var $withs = [];
+    var $validatedData = [];
+    var $storeValidateRequest = [];
+    var $updateValidateRequest = [];
 
     public function __construct()
     {
         $this->model = new $this->model;
+
+        if ($this->validatedData != []) {
+            if ($this->storeValidateRequest != []) {
+                $this->storeValidateRequest = $this->validatedData;
+            }
+
+            if ($this->updateValidateRequest != []) {
+                $this->updateValidateRequest = $this->validatedData;
+            }
+        }
     }
 
     /**
@@ -59,6 +72,17 @@ class ApiController extends Controller
      */
     public function store(Request $request)
     {
+        if ($this->storeValidateRequest != []) {
+            try {
+                $validatedData = $request->validate($this->storeValidateRequest);
+            } catch (\Illuminate\Validation\ValidationException $e) {
+                return response()->json(['message' => $e->errors()], Response::HTTP_BAD_REQUEST);
+            }
+        }
+        else {
+            $validatedData = $request->post();
+        }
+
         // Validate incoming request
         $validatedData = $request->post();
 
@@ -100,7 +124,16 @@ class ApiController extends Controller
         }
 
         // Validate incoming request
-        $validatedData = $request->post();
+        if ($this->updateValidateRequest != []) {
+            try {
+                $validatedData = $request->validate($this->updateValidateRequest);
+            } catch (\Illuminate\Validation\ValidationException $e) {
+                return response()->json(['message' => $e->errors()], Response::HTTP_BAD_REQUEST);
+            }
+        }
+        else {
+            $validatedData = $request->post();
+        }
 
         // Update result
         $result->update($validatedData);
