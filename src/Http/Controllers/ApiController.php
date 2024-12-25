@@ -5,6 +5,7 @@ use App\Http\Controllers\Controller;
 use Edwinrtoha\Laravelboilerplate\Models\ModelStd;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class ApiController extends Controller
 {
@@ -43,20 +44,36 @@ class ApiController extends Controller
         return $query;
     }
 
-    public function response($data, $status = Response::HTTP_OK) {
-        $metadata = [
-            'total' => $data->total(),
-            'per_page' => $data->perPage(),
-            'current_page' => $data->currentPage(),
-            'last_page' => $data->lastPage(),
-            'next_page_url' => $data->nextPageUrl(),
-            'prev_page_url' => $data->previousPageUrl(),
-        ];
+    public function response($data = [], $status = Response::HTTP_OK, $errors = null) {
+        // check $data is paginate or not
+        if ($data instanceof LengthAwarePaginator) {
+            $metadata = [
+                'total' => $data->total(),
+                'per_page' => $data->perPage(),
+                'current_page' => $data->currentPage(),
+                'last_page' => $data->lastPage(),
+                'next_page_url' => $data->nextPageUrl(),
+                'prev_page_url' => $data->previousPageUrl(),
+            ];
+            $items = $data->items();
+        }
+        else {
+            $metadata = [
+                'total' => sizeof($data),
+                'per_page' => sizeof($data),
+                'current_page' => 1,
+                'last_page' => 1,
+                'next_page_url' => null,
+                'prev_page_url' => null,
+            ];
+            $items = $data;
+        }
 
         // Return response with metadata
         return response()->json([
             'meta' => $metadata,
-            'data' => $data->items(),
+            'errors' => $errors,
+            'data' => $items,
         ], $status);
     }
 
@@ -82,7 +99,7 @@ class ApiController extends Controller
             try {
                 $validatedData = $request->validate($this->storeValidateRequest);
             } catch (\Illuminate\Validation\ValidationException $e) {
-                return response()->json(['message' => $e->errors()], Response::HTTP_BAD_REQUEST);
+                return $this->response([], Response::HTTP_BAD_REQUEST, $e->errors());
             }
         }
         else {
@@ -96,7 +113,7 @@ class ApiController extends Controller
         $result = $this->model::create($validatedData);
 
         // Return response
-        return response()->json($result, Response::HTTP_CREATED);
+        return $this->response($result, Response::HTTP_CREATED);
     }
 
     /**
@@ -109,7 +126,7 @@ class ApiController extends Controller
 
         // If result not found, return 404
         if (!$result) {
-            return response()->json(['message' => 'result not found'], Response::HTTP_NOT_FOUND);
+            return $this->response([], Response::HTTP_NOT_FOUND, ['message' => 'result not found']);
         }
 
         // Return the result
@@ -126,7 +143,7 @@ class ApiController extends Controller
 
         // If result not found, return 404
         if (!$result) {
-            return response()->json(['message' => 'result not found'], Response::HTTP_NOT_FOUND);
+            return $this->response([], Response::HTTP_NOT_FOUND, ['message' => 'result not found']);
         }
 
         // Validate incoming request
@@ -134,7 +151,7 @@ class ApiController extends Controller
             try {
                 $validatedData = $request->validate($this->updateValidateRequest);
             } catch (\Illuminate\Validation\ValidationException $e) {
-                return response()->json(['message' => $e->errors()], Response::HTTP_BAD_REQUEST);
+                return $this->response([], Response::HTTP_BAD_REQUEST, $e->errors());
             }
         }
         else {
@@ -145,7 +162,7 @@ class ApiController extends Controller
         $result->update($validatedData);
 
         // Return response
-        return response()->json($result, Response::HTTP_OK);
+        return $this->response($result, Response::HTTP_OK);
     }
 
     /**
@@ -158,13 +175,13 @@ class ApiController extends Controller
 
         // If result not found, return 404
         if (!$result) {
-            return response()->json(['message' => 'result not found'], Response::HTTP_NOT_FOUND);
+            return $this->response([], Response::HTTP_NOT_FOUND, ['message' => 'result not found']);
         }
 
         // Delete result
         $result->delete();
 
         // Return response
-        return response()->json(['message' => 'result deleted successfully'], Response::HTTP_NO_CONTENT);
+        return $this->response(['message' => 'data deleted sucessfully'], Response::HTTP_OK);
     }
 }
