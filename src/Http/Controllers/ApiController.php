@@ -13,6 +13,7 @@ class ApiController extends Controller
     var $validatedData = [];
     var $storeValidateRequest = [];
     var $updateValidateRequest = [];
+    var $paginate = 10;
 
     public function __construct()
     {
@@ -62,7 +63,12 @@ class ApiController extends Controller
     public function index()
     {
         // Fetch all results
-        $results = $this->query()->with($this->withs)->paginate(10);
+        if ($this->paginate == 0 || $this->paginate == null) {
+            $results = $this->query()->with($this->withs)->get();
+        }
+        else {
+            $results = $this->query()->with($this->withs)->paginate($this->paginate);
+        }
 
         return $this->response($results);
     }
