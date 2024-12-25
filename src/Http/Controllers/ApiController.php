@@ -58,14 +58,38 @@ class ApiController extends Controller
             $items = $data->items();
         }
         else {
-            $metadata = [
-                'total' => sizeof($data),
-                'per_page' => sizeof($data),
-                'current_page' => 1,
-                'last_page' => 1,
-                'next_page_url' => null,
-                'prev_page_url' => null,
-            ];
+            $isArray = function () use ($data) {
+                foreach ($data as $element) {
+                    if (is_array($element)) {
+                        return true;
+                    }
+                    else {
+                        return false;
+                    }
+                }
+            };
+
+            if ($isArray()) {
+                $metadata = [
+                    'total' => sizeof($data),
+                    'per_page' => sizeof($data),
+                    'current_page' => 1,
+                    'last_page' => 1,
+                    'next_page_url' => null,
+                    'prev_page_url' => null,
+                ];
+            }
+            else {
+                $metadata = [
+                    'total' => 1,
+                    'per_page' => 1,
+                    'current_page' => 1,
+                    'last_page' => 1,
+                    'next_page_url' => null,
+                    'prev_page_url' => null,
+                ];
+                $items = $data;
+            }
             $items = $data;
         }
 
