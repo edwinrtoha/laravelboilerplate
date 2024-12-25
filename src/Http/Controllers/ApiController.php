@@ -19,11 +19,11 @@ class ApiController extends Controller
         $this->model = new $this->model;
 
         if ($this->validatedData != []) {
-            if ($this->storeValidateRequest != []) {
+            if ($this->storeValidateRequest == []) {
                 $this->storeValidateRequest = $this->validatedData;
             }
 
-            if ($this->updateValidateRequest != []) {
+            if ($this->updateValidateRequest == []) {
                 $this->updateValidateRequest = $this->validatedData;
             }
         }
