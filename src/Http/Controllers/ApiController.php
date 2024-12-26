@@ -159,7 +159,7 @@ class ApiController extends Controller
         }
 
         // Return the result
-        return response()->json($result, Response::HTTP_OK);
+        return $this->response($result, Response::HTTP_OK);
     }
 
     /**
