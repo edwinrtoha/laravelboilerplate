@@ -31,6 +31,11 @@ class ApiController extends Controller
         }
     }
 
+    public function validateRequest(Request $request, $validatedData) {
+        $validatedData = $request->validate($this->storeValidateRequest);
+        return $validatedData;
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -121,7 +126,7 @@ class ApiController extends Controller
     {
         if ($this->storeValidateRequest != []) {
             try {
-                $validatedData = $request->validate($this->storeValidateRequest);
+                $this->validateRequest($request, $this->storeValidateRequest);
             } catch (\Illuminate\Validation\ValidationException $e) {
                 return $this->response([], Response::HTTP_BAD_REQUEST, $e->errors());
             }
@@ -173,7 +178,7 @@ class ApiController extends Controller
         // Validate incoming request
         if ($this->updateValidateRequest != []) {
             try {
-                $validatedData = $request->validate($this->updateValidateRequest);
+                $validatedData = $this->validateRequest($request, $this->updateValidateRequest);
             } catch (\Illuminate\Validation\ValidationException $e) {
                 return $this->response([], Response::HTTP_BAD_REQUEST, $e->errors());
             }
