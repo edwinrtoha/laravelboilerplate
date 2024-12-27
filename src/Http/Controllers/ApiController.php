@@ -243,4 +243,22 @@ class ApiController extends Controller
             ], Response::HTTP_NOT_FOUND);
         }
     }
+
+    public function forceDelete($id)
+    {
+        // if $this->model use SoftDeletes
+        if (!in_array('Illuminate\Database\Eloquent\SoftDeletes', class_uses($this->model))) {
+            return $this->response([], Response::HTTP_NOT_IMPLEMENTED, 'Not Implemented');
+        }
+
+        $this->instance = $this->instance::withTrashed()->find($id);
+        if ($this->instance) {
+            $this->instance->forceDelete();
+            return $this->response([], Response::HTTP_NO_CONTENT);
+        } else {
+            return $this->response([
+                'message' => 'Data not found in trash',
+            ], Response::HTTP_NOT_FOUND);
+        }
+    }
 }
