@@ -121,6 +121,16 @@ class ApiController extends Controller
         return $this->response($results);
     }
 
+    public function trashed()
+    {
+        // if $this->model use SoftDeletes
+        if (!in_array('Illuminate\Database\Eloquent\SoftDeletes', class_uses($this->model))) {
+            return $this->response([], Response::HTTP_NOT_IMPLEMENTED, 'Not Implemented');
+        }
+        $this->instance = $this->instance::onlyTrashed();
+        return $this->index();
+    }
+
     /**
      * Store a newly created resource in storage.
      */
