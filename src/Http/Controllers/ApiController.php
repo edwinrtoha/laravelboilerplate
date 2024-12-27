@@ -225,4 +225,22 @@ class ApiController extends Controller
         // Return response
         return $this->response(['message' => 'data deleted sucessfully'], Response::HTTP_OK);
     }
+
+    public function restore($id)
+    {
+        // if $this->model use SoftDeletes
+        if (!in_array('Illuminate\Database\Eloquent\SoftDeletes', class_uses($this->model))) {
+            return $this->response([], Response::HTTP_NOT_IMPLEMENTED, 'Not Implemented');
+        }
+
+        $this->instance = $this->instance::withTrashed()->find($id);
+        if ($this->instance) {
+            $this->instance->restore();
+            return $this->response($this->instance, Response::HTTP_OK);
+        } else {
+            return $this->response([
+                'message' => 'Data not found in trash',
+            ], Response::HTTP_NOT_FOUND);
+        }
+    }
 }
