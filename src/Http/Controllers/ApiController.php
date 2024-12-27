@@ -10,6 +10,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 class ApiController extends Controller
 {
     var $model = ModelStd::class;
+    var $instance;
     var $withs = [];
     var $validatedData = [];
     var $storeValidateRequest = [];
@@ -19,6 +20,7 @@ class ApiController extends Controller
     public function __construct()
     {
         $this->model = new $this->model;
+        $this->instance = $this->model;
 
         if ($this->validatedData != []) {
             if ($this->storeValidateRequest == []) {
@@ -40,12 +42,12 @@ class ApiController extends Controller
      * Display a listing of the resource.
      */
     public function queryModifier() {
-        return $this->model;
+        return $this->instance;
     }
 
     public function query()
     {
-        $query = $this->queryModifier();
+        $query = $this->instance;
         return $query;
     }
 
@@ -110,10 +112,10 @@ class ApiController extends Controller
     {
         // Fetch all results
         if ($this->paginate == 0 || $this->paginate == null) {
-            $results = $this->query()->with($this->withs)->get();
+            $results = $this->instance->with($this->withs)->get();
         }
         else {
-            $results = $this->query()->with($this->withs)->paginate($this->paginate);
+            $results = $this->instance->with($this->withs)->paginate($this->paginate);
         }
 
         return $this->response($results);
