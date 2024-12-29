@@ -51,7 +51,7 @@ class ApiController extends Controller
         return $query;
     }
 
-    public function response($data = [], $status = Response::HTTP_OK, $errors = null) {
+    public function response($data = [], $status = Response::HTTP_OK, $errors = null, $message = null) {
         // check $data is paginate or not
         if ($data instanceof LengthAwarePaginator) {
             $metadata = [
@@ -104,6 +104,7 @@ class ApiController extends Controller
         return response()->json([
             'meta' => $metadata,
             'errors' => $errors,
+            'message' => $message,
             'data' => $items,
         ], $status);
     }
