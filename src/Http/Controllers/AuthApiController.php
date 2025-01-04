@@ -20,7 +20,7 @@ class AuthApiController extends Controller
             ], Response::HTTP_OK);
         }
 
-        return ApiController::response([], Response::HTTP_UNAUTHORIZED);
+        return ApiController::response([], status:Response::HTTP_UNAUTHORIZED, errors: 'Not Authorized');
     }
 
     public function logout(Request $request)
