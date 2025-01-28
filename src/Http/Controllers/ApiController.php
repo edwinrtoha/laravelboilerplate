@@ -109,7 +109,7 @@ class ApiController extends Controller
         ], $status);
     }
 
-    public function index()
+    public function index(Request $request)
     {
         // Fetch all results
         if ($this->paginate == 0 || $this->paginate == null) {
