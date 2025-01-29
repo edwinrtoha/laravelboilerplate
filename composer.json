@@ -22,7 +22,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Spatie\\Permission\\LaravelboilerplateServiceProvider"
+                "Edwinrtoha\\Laravelboilerplate\\LaravelboilerplateServiceProvider"
             ]
         }
     }
