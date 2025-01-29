@@ -2,6 +2,8 @@
 namespace Edwinrtoha\Laravelboilerplate\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Closure;
+use Edwinrtoha\Laravelboilerplate\Models\EndpointHasPermission;
 use Edwinrtoha\Laravelboilerplate\Models\ModelStd;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -16,6 +18,27 @@ class ApiController extends Controller
     var $storeValidateRequest = [];
     var $updateValidateRequest = [];
     var $paginate = 10;
+
+    public static function middleware()
+    {
+        return [
+            function (Request $request, Closure $next) {
+                try {
+                    $need_permission = EndpointHasPermission::with(['permission'])->where('endpoint', $request->path())->where('method', $request->method())->get()->pluck(('permission.name'));
+                    $user_permission = $request->user()->getAllPermissions()->pluck('name');
+                    $diff = $need_permission->diff($user_permission);
+
+                    if ($diff->count() > 0) {
+                        throw new \Exception('User does not have the required permissions.');
+                    }
+                    return $next($request);
+                } catch (\Exception $e) {
+                    return ApiController::response([], 404, $e->getMessage());
+                }
+                return $next($request);
+            },    
+        ];
+    }
 
     public function __construct()
     {
