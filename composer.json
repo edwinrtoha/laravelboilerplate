@@ -18,5 +18,12 @@
         "php": ">=8.0",
         "illuminate/support": ">=9.19",
         "spatie/laravel-permission": "^6.10"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Spatie\\Permission\\LaravelboilerplateServiceProvider"
+            ]
+        }
     }
 }
