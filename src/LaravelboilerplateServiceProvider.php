@@ -50,7 +50,7 @@ class LaravelboilerplateServiceProvider extends ServiceProvider
         }
 
         $this->publishes([
-            __DIR__.'/../database/migrations/create_endpoint_has_permissions_table.php.stub' => $this->getMigrationFileName('create_endpoint_has_permissions_table.php'),
+            __DIR__.'/database/migrations/create_endpoint_has_permissions_table.php.stub' => $this->getMigrationFileName('create_endpoint_has_permissions_table.php'),
         ], 'endpoint-has-permissions-migrations');
     }
 }
