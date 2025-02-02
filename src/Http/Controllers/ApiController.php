@@ -161,7 +161,9 @@ class ApiController extends Controller
 
         foreach ($this->keyword_field as $field) {
             $this->instance = $this->instance->where(function($query) use ($field, $request) {
-                $query->orWhere($field, 'like', '%'.$request->keyword.'%');
+                foreach (explode(' ', $request->input('keyword')) as $keyword) {
+                    $query->orWhere($field, 'LIKE', "%{$keyword}%");
+                }
             });
         }
         
