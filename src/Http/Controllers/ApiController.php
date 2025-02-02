@@ -19,6 +19,9 @@ class ApiController extends Controller
     var $updateValidateRequest = [];
     var $paginate = 10;
 
+    var $keyword_field = [];
+    var $filter_validated = [];
+
     public static function middleware()
     {
         return [
@@ -57,8 +60,18 @@ class ApiController extends Controller
     }
 
     public function validateRequest(Request $request, $validatedData) {
-        $validatedData = $request->validate($this->storeValidateRequest);
-        return $validatedData;
+        if ($this->storeValidateRequest != []) {
+            try {
+                $this->validatedData = $request->validate($this->storeValidateRequest);
+            } catch (\Illuminate\Validation\ValidationException $e) {
+                return $this->response([], Response::HTTP_BAD_REQUEST, $e->errors());
+            }
+        }
+        else {
+            $this->validatedData = $request->all();
+        }
+
+        return $this->validatedData;
     }
 
     /**
@@ -134,6 +147,24 @@ class ApiController extends Controller
 
     public function index(Request $request)
     {
+        try {
+            $this->filter_validated = $request->validate($this->filter_validated);
+        } catch (\Exception $e) {
+            return $this->response([], 400, $e->getMessage());
+        }
+
+        foreach ($this->filter_validated as $key => $value) {
+            if ($value != null) {
+                $this->instance = $this->instance->where($key, $value);
+            }
+        }
+
+        foreach ($this->keyword_field as $field) {
+            $this->instance = $this->instance->where(function($query) use ($field, $request) {
+                $query->orWhere($field, 'like', '%'.$request->keyword.'%');
+            });
+        }
+        
         // Fetch all results
         if ($this->paginate == 0 || $this->paginate == null) {
             $results = $this->instance->with($this->withs)->get();
