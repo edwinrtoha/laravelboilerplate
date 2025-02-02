@@ -64,7 +64,7 @@ class ApiController extends Controller
             try {
                 $this->validatedData = $request->validate($this->storeValidateRequest);
             } catch (\Illuminate\Validation\ValidationException $e) {
-                return $this->response([], Response::HTTP_BAD_REQUEST, $e->errors());
+                return $this->response($request, [], Response::HTTP_BAD_REQUEST, $e->errors());
             }
         }
         else {
@@ -150,7 +150,7 @@ class ApiController extends Controller
         try {
             $this->filter_validated = $request->validate($this->filter_validated);
         } catch (\Exception $e) {
-            return $this->response([], 400, $e->getMessage());
+            return $this->response($request, [], 400, $e->getMessage());
         }
 
         foreach ($this->filter_validated as $key => $value) {
@@ -175,17 +175,17 @@ class ApiController extends Controller
             $results = $this->instance->with($this->withs)->paginate($this->paginate);
         }
 
-        return $this->response($results);
+        return $this->response($request, $results);
     }
 
-    public function trashed()
+    public function trashed(Request $request)
     {
         // if $this->model use SoftDeletes
         if (!in_array('Illuminate\Database\Eloquent\SoftDeletes', class_uses($this->model))) {
-            return $this->response([], Response::HTTP_NOT_IMPLEMENTED, 'Not Implemented');
+            return $this->response($request, [], Response::HTTP_NOT_IMPLEMENTED, 'Not Implemented');
         }
         $this->instance = $this->instance::onlyTrashed();
-        return $this->index();
+        return $this->index($request);
     }
 
     /**
@@ -197,7 +197,7 @@ class ApiController extends Controller
             try {
                 $this->validateRequest($request, $this->storeValidateRequest);
             } catch (\Illuminate\Validation\ValidationException $e) {
-                return $this->response([], Response::HTTP_BAD_REQUEST, $e->errors());
+                return $this->response($request, [], Response::HTTP_BAD_REQUEST, $e->errors());
             }
         }
         else {
@@ -211,24 +211,24 @@ class ApiController extends Controller
         $result = $this->model::create($validatedData);
 
         // Return response
-        return $this->response($result, Response::HTTP_CREATED);
+        return $this->response($request, $result, Response::HTTP_CREATED);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Request $request, string $id)
     {
         // Find result by ID
         $result = $this->model::with($this->withs)->find($id);
 
         // If result not found, return 404
         if (!$result) {
-            return $this->response([], Response::HTTP_NOT_FOUND, ['message' => 'result not found']);
+            return $this->response($request, [], Response::HTTP_NOT_FOUND, ['message' => 'result not found']);
         }
 
         // Return the result
-        return $this->response($result, Response::HTTP_OK);
+        return $this->response($request, $result, Response::HTTP_OK);
     }
 
     /**
@@ -241,7 +241,7 @@ class ApiController extends Controller
 
         // If result not found, return 404
         if (!$result) {
-            return $this->response([], Response::HTTP_NOT_FOUND, ['message' => 'result not found']);
+            return $this->response($request, [], Response::HTTP_NOT_FOUND, ['message' => 'result not found']);
         }
 
         // Validate incoming request
@@ -249,7 +249,7 @@ class ApiController extends Controller
             try {
                 $validatedData = $this->validateRequest($request, $this->updateValidateRequest);
             } catch (\Illuminate\Validation\ValidationException $e) {
-                return $this->response([], Response::HTTP_BAD_REQUEST, $e->errors());
+                return $this->response($request, [], Response::HTTP_BAD_REQUEST, $e->errors());
             }
         }
         else {
@@ -260,7 +260,7 @@ class ApiController extends Controller
         $result->update($validatedData);
 
         // Return response
-        return $this->response($result, Response::HTTP_OK);
+        return $this->response($request, $result, Response::HTTP_OK);
     }
 
     /**
@@ -273,21 +273,21 @@ class ApiController extends Controller
 
         // If result not found, return 404
         if (!$result) {
-            return $this->response([], Response::HTTP_NOT_FOUND, ['message' => 'result not found']);
+            return $this->response($request, [], Response::HTTP_NOT_FOUND, ['message' => 'result not found']);
         }
 
         // Delete result
         $result->delete();
 
         // Return response
-        return $this->response(['message' => 'data deleted sucessfully'], Response::HTTP_OK);
+        return $this->response($request, ['message' => 'data deleted sucessfully'], Response::HTTP_OK);
     }
 
-    public function restore($id)
+    public function restore(Request $request, $id)
     {
         // if $this->model use SoftDeletes
         if (!in_array('Illuminate\Database\Eloquent\SoftDeletes', class_uses($this->model))) {
-            return $this->response([], Response::HTTP_NOT_IMPLEMENTED, 'Not Implemented');
+            return $this->response($request, [], Response::HTTP_NOT_IMPLEMENTED, 'Not Implemented');
         }
 
         $this->instance = $this->instance::withTrashed()->find($id);
@@ -295,25 +295,25 @@ class ApiController extends Controller
             $this->instance->restore();
             return $this->response($this->instance, Response::HTTP_OK);
         } else {
-            return $this->response([
+            return $this->response($request, [
                 'message' => 'Data not found in trash',
             ], Response::HTTP_NOT_FOUND);
         }
     }
 
-    public function forceDelete($id)
+    public function forceDelete(Request $request, $id)
     {
         // if $this->model use SoftDeletes
         if (!in_array('Illuminate\Database\Eloquent\SoftDeletes', class_uses($this->model))) {
-            return $this->response([], Response::HTTP_NOT_IMPLEMENTED, 'Not Implemented');
+            return $this->response($request, [], Response::HTTP_NOT_IMPLEMENTED, 'Not Implemented');
         }
 
         $this->instance = $this->instance::withTrashed()->find($id);
         if ($this->instance) {
             $this->instance->forceDelete();
-            return $this->response([], Response::HTTP_NO_CONTENT);
+            return $this->response($request, [], Response::HTTP_NO_CONTENT);
         } else {
-            return $this->response([
+            return $this->response($request, [
                 'message' => 'Data not found in trash',
             ], Response::HTTP_NOT_FOUND);
         }
