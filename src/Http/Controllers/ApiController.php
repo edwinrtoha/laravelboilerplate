@@ -87,7 +87,7 @@ class ApiController extends Controller
         return $query;
     }
 
-    public static function response($data = [], $status = Response::HTTP_OK, $errors = null, $message = null) {
+    public function response($data = [], $status = Response::HTTP_OK, $errors = null, $message = null) {
         // check $data is paginate or not
         if ($data instanceof LengthAwarePaginator) {
             $metadata = [
@@ -166,7 +166,7 @@ class ApiController extends Controller
                 }
             });
         }
-        
+
         // Fetch all results
         if ($this->paginate == 0 || $this->paginate == null) {
             $results = $this->instance->with($this->withs)->get();
