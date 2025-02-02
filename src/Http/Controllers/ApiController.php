@@ -87,7 +87,7 @@ class ApiController extends Controller
         return $query;
     }
 
-    public function response($data = [], $status = Response::HTTP_OK, $errors = null, $message = null) {
+    public function response(Request $request, $data = [], $status = Response::HTTP_OK, $errors = null, $message = null) {
         // check $data is paginate or not
         if ($data instanceof LengthAwarePaginator) {
             $metadata = [
