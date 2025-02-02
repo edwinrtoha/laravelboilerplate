@@ -90,13 +90,22 @@ class ApiController extends Controller
     public function response(Request $request, $data = [], $status = Response::HTTP_OK, $errors = null, $message = null) {
         // check $data is paginate or not
         if ($data instanceof LengthAwarePaginator) {
+            $params = [];
+            foreach ($request->all() as $key => $value) {
+                if ($key == 'page' || $key == 'limit') {
+                    continue;
+                }
+                $params[] = "{$key}=" . urlencode($value);
+            }
+            $params = implode('&', $params);
+            
             $metadata = [
                 'total' => $data->total(),
                 'per_page' => $data->perPage(),
                 'current_page' => $data->currentPage(),
                 'last_page' => $data->lastPage(),
-                'next_page_url' => $data->nextPageUrl(),
-                'prev_page_url' => $data->previousPageUrl(),
+                'next_page_url' => $data->nextPageUrl() ? $data->nextPageUrl() . '&' . $params : null,
+                'prev_page_url' => $data->previousPageUrl() ? $data->previousPageUrl() . '&' . $params : null,
             ];
             $items = $data->items();
         }
