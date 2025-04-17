@@ -14,5 +14,9 @@ class ModelStd extends Model
         'id' => 'string'
     ];
 
+    protected $hidden = [
+        'laravel_through_key'
+    ];
+
     protected $guarded = [];
 }
