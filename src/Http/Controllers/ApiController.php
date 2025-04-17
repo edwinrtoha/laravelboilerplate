@@ -36,7 +36,7 @@ class ApiController extends Controller
                     }
                     return $next($request);
                 } catch (\Exception $e) {
-                    return ApiController::response($request, [], 404, $e->getMessage());
+                    return ApiController::response([], 404, $e->getMessage());
                 }
                 return $next($request);
             },    
@@ -209,32 +209,15 @@ class ApiController extends Controller
                 return $this->response($request, [], Response::HTTP_BAD_REQUEST, $e->errors());
             }
         }
+        else {
+            $validatedData = $request->post();
+        }
 
+        // Validate incoming request
         $validatedData = $request->post();
-
-        $validatedDataArray = [];
-        $validatedData = array_filter($validatedData, function ($value, $key) use (&$validatedDataArray) {
-            if (is_array($value)) {
-                $validatedDataArray[$key] = $value;
-                return false;
-            }
-            return true;
-        }, ARRAY_FILTER_USE_BOTH);
 
         // Create a new result
         $result = $this->model::create($validatedData);
-
-        if ($validatedDataArray != []) {
-            foreach ($validatedDataArray as $key => $value) {
-                if (is_array($value)) {
-                    foreach ($value as $item) {
-                        $result->$key()->create($item);
-                    }
-                }
-            }
-        }
-
-
 
         // Return response
         return $this->response($request, $result, Response::HTTP_CREATED);
