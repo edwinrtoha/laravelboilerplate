@@ -177,11 +177,15 @@ class ApiController extends Controller
         }
 
         // Fetch all results
+        $results = $this->instance;
+        if ($this->withs != []) {
+            $results = $this->instance->with($this->withs);
+        }
         if ($this->paginate == 0 || $this->paginate == null) {
-            $results = $this->instance->with($this->withs)->get();
+            $results = $results->get();
         }
         else {
-            $results = $this->instance->with($this->withs)->paginate($this->paginate);
+            $results = $results->paginate($this->paginate);
         }
 
         return $this->response($request, $results);
