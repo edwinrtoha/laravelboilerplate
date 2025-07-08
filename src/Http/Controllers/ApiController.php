@@ -22,6 +22,15 @@ class ApiController extends Controller
     var $keyword_field = [];
     var $filter_validated = [];
 
+    protected function callHook(string $hook): void
+    {
+        if (! method_exists($this, $hook)) {
+            return;
+        }
+
+        $this->{$hook}();
+    }
+
     public static function middleware()
     {
         return [
@@ -202,6 +211,7 @@ class ApiController extends Controller
      */
     public function store(Request $request)
     {
+        $this->callHook('beforeValidate');
         if ($this->storeValidateRequest != []) {
             try {
                 $validatedData = $this->validateRequest($request, $this->storeValidateRequest);
@@ -222,14 +232,22 @@ class ApiController extends Controller
             return true;
         }, ARRAY_FILTER_USE_BOTH);
 
+        $this->callHook('afterValidate');
+
+        $this->callHook('beforeCreate');
+        
         // Create a new result
         $result = $this->model::create($validatedData);
+
+        $this->callHook('afterCreate');
         
         if ($validatedDataArray != []) {
             foreach ($validatedDataArray as $key => $value) {
                 if (is_array($value)) {
                     foreach ($value as $item) {
+                        $this->callHook('beforeCreateRelationalData');
                         $result->$key()->create($item);
+                        $this->callHook('afterCreateRelationalData');
                     }
                 }
             }
