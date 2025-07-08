@@ -70,11 +70,7 @@ class ApiController extends Controller
 
     public function validateRequest(Request $request, $validatedData) {
         if ($this->storeValidateRequest != []) {
-            try {
-                $this->validatedData = $request->validate($this->storeValidateRequest);
-            } catch (\Illuminate\Validation\ValidationException $e) {
-                return $this->response($request, [], Response::HTTP_BAD_REQUEST, $e->errors());
-            }
+            $this->validatedData = $request->validate($this->storeValidateRequest);
         }
         else {
             $this->validatedData = $request->all();
