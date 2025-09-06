@@ -57,6 +57,8 @@ class LaravelboilerplateServiceProvider extends ServiceProvider
             __DIR__.'/database/migrations/create_workflow_histories_table.php.stub' => $this->getMigrationFileName('create_workflow_histories_table.php'),
             __DIR__.'/database/migrations/set_nullable_to_field_from_state_id_in_workflow_transitions_table.php.stub' => $this->getMigrationFileName('set_nullable_to_field_from_state_id_in_workflow_transitions_table.php'),
             __DIR__.'/database/migrations/add_notes_to_workflow_histories_table.php.stub' => $this->getMigrationFileName('add_notes_to_workflow_histories_table.php'),
+            __DIR__.'/database/migrations/add_idx_to_workflow_transitions_table.php.stub' => $this->getMigrationFileName('add_idx_to_workflow_transitions_table.php'),
+            __DIR__.'/database/migrations/create_workflow_transition_permissions_table.php.stub' => $this->getMigrationFileName('create_workflow_transition_permissions_table.php'),
         ], 'endpoint-has-permissions-migrations');
     }
 }
