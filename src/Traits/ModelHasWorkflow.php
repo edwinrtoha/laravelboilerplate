@@ -4,9 +4,9 @@ namespace Edwinrtoha\Laravelboilerplate\Traits;
 use Edwinrtoha\Laravelboilerplate\Models\WorkflowHistory;
 use Edwinrtoha\Laravelboilerplate\Models\WorkflowTransition;
 
-trait WorkflowModel
+trait ModelHasWorkflow
 {
-    var $appends = ['next_states', 'last_state'];
+    protected array $workflowAppends = ['next_states', 'last_state'];
 
     public function workflow_histories()
     {
