@@ -3,7 +3,7 @@
 namespace Edwinrtoha\Laravelboilerplate\Models;
 
 use Edwinrtoha\Laravelboilerplate\Models\ModelStd;
-use Spatie\Permission\Models\Permission;
+use Edwinrtoha\Laravelboilerplate\Models\Permission;
 
 class WorkflowTransition extends ModelStd
 {
