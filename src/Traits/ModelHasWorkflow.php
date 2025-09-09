@@ -2,7 +2,7 @@
 namespace Edwinrtoha\Laravelboilerplate\Traits;
 
 use Edwinrtoha\Laravelboilerplate\Models\WorkflowHistory;
-use Edwinrtoha\Laravelboilerplate\Models\WorkflowTransition;
+use App\Models\WorkflowTransition;
 
 trait ModelHasWorkflow
 {
@@ -24,7 +24,8 @@ trait ModelHasWorkflow
                 $query->where('model_type', get_class($this));
             });
         }
-        $workflow = $workflow->with(['permissions'])->whereHas('permissions', function ($query) use($session_permission) {
+        $workflow = $workflow->with(['permissions']);
+        $workflow = $workflow->whereHas('permissions', function ($query) use($session_permission) {
             $query->whereIn('permissions.uuid', $session_permission);
         });
         return $workflow->get()->pluck('toState');
