@@ -2,7 +2,7 @@
 namespace Edwinrtoha\Laravelboilerplate\Traits;
 
 use Edwinrtoha\Laravelboilerplate\Models\WorkflowHistory;
-use App\Models\WorkflowTransition;
+use Edwinrtoha\Laravelboilerplate\Models\WorkflowTransition;
 
 trait ModelHasWorkflow
 {
