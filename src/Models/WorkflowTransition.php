@@ -21,7 +21,7 @@ class WorkflowTransition extends ModelStd
             'workflow_transition_id', // FK on pivot to this model
             'permission_id'           // FK on pivot to Permission
         )->withTimestamps()          // since your pivot has timestamps
-        ->withPivot('uuid')         // optional if you need the pivot UUID
+        ->withPivot('id')         // optional if you need the pivot UUID
         ->as('link');              // optional alias for the pivot relation
     }
     public function fromState()
