@@ -16,7 +16,7 @@ trait ModelHasWorkflow
     public function getNextStatesAttribute()
     {
         $workflow = $this->workflow_histories()->latest()->first();
-        $session_permission = auth()->user()->getAllPermissions()->pluck('uuid');
+        $session_permission = auth()->user()->getAllPermissions()->pluck('id');
         if ($workflow) {
             $workflow = WorkflowTransition::with(['toState'])->where('workflow_id', $workflow->workflow_id)->where('from_state_id', $workflow->state_id);
         } else {
