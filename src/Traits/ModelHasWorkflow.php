@@ -25,7 +25,7 @@ trait ModelHasWorkflow
             });
         }
         $workflow = $workflow->with(['permissions'])->whereHas('permissions', function ($query) use($session_permission) {
-            $query->whereIn('permissions.uuid', $session_permission);
+            $query->whereIn('permissions.id', $session_permission);
         });
         return $workflow->get()->pluck('toState');
     }
