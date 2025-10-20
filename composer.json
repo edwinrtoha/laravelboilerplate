@@ -16,7 +16,7 @@
     ],
     "require": {
         "php": ">=8.0",
-        "bezhansalleh/filament-shield": "^3.3",
+        "bezhansalleh/filament-shield": "^3.3|^4.0",
         "illuminate/support": ">=9.19",
         "spatie/laravel-permission": "^6.10",
         "spatie/laravel-activitylog": "^4.10"
