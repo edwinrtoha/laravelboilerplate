@@ -20,6 +20,7 @@ class ApiController extends Controller
     var $deleteValidateRequest = [];
     var $bulkDeleteValidateRequest = [];
     var $paginate = 10;
+    var $permissions = [];
 
     var $keyword_field = [];
     var $filter_validated = [];
