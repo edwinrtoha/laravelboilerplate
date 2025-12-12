@@ -17,6 +17,8 @@ class ApiController extends Controller
     var $validatedData = [];
     var $storeValidateRequest = [];
     var $updateValidateRequest = [];
+    var $deleteValidateRequest = [];
+    var $bulkDeleteValidateRequest = [];
     var $paginate = 10;
 
     var $keyword_field = [];
@@ -68,9 +70,30 @@ class ApiController extends Controller
         }
     }
 
-    public function validateRequest(Request $request, $validatedData) {
-        if ($this->storeValidateRequest != []) {
-            $this->validatedData = $request->validate($this->storeValidateRequest);
+    public function getValidationRules($action) {
+        $rules = [];
+        if ($action == 'store' && !empty($this->storeValidateRequest)) {
+            $rules = $this->storeValidateRequest;
+        } elseif ($action == 'update' && !empty($this->updateValidateRequest)) {
+            $rules = $this->updateValidateRequest;
+        } elseif ($action == 'delete' && !empty($this->deleteValidateRequest)) {
+            $rules = $this->deleteValidateRequest;
+        } elseif ($action == 'bulk_delete' && !empty($this->bulkDeleteValidateRequest)) {
+            $rules = $this->bulkDeleteValidateRequest;
+        }
+
+        if (empty($rules) && !empty($this->validatedData) && in_array($action, ['store', 'update'])) {
+            $rules = $this->validatedData;
+        }
+
+        return $rules;
+    }
+
+    public function validateRequest(Request $request, string $action = null) {
+        $rules = $this->getValidationRules($action);
+
+        if (!empty($rules)) {
+            $this->validatedData = $request->validate($rules);
         }
         else {
             $this->validatedData = $request->all();
@@ -208,15 +231,11 @@ class ApiController extends Controller
     public function store(Request $request)
     {
         $this->callHook('beforeValidate');
-        if ($this->storeValidateRequest != []) {
-            try {
-                $validatedData = $this->validateRequest($request, $this->storeValidateRequest);
-            } catch (\Illuminate\Validation\ValidationException $e) {
-                return $this->response($request, [], Response::HTTP_BAD_REQUEST, $e->errors());
-            }
-        }
-        else {
-            $validatedData = $request->post();
+
+        try {
+            $validatedData = $this->validateRequest($request, 'store');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->response($request, [], Response::HTTP_BAD_REQUEST, $e->errors());
         }
 
         $validatedDataArray = [];
@@ -286,15 +305,10 @@ class ApiController extends Controller
         }
 
         // Validate incoming request
-        if ($this->updateValidateRequest != []) {
-            try {
-                $validatedData = $this->validateRequest($request, $this->updateValidateRequest);
-            } catch (\Illuminate\Validation\ValidationException $e) {
-                return $this->response($request, [], Response::HTTP_BAD_REQUEST, $e->errors());
-            }
-        }
-        else {
-            $validatedData = $request->post();
+        try {
+            $validatedData = $this->validateRequest($request, 'update');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->response($request, [], Response::HTTP_BAD_REQUEST, $e->errors());
         }
 
         // Update result
@@ -321,6 +335,28 @@ class ApiController extends Controller
         $result->delete();
 
         // Return response
+        return $this->response($request, ['message' => 'data deleted sucessfully'], Response::HTTP_OK);
+    }
+
+    public function bulkDestroy(Request $request)
+    {
+        try {
+            $validatedData = $this->validateRequest($request, 'bulk_delete');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->response($request, [], Response::HTTP_BAD_REQUEST, $e->errors());
+        }
+
+        $this->callHook('beforeBulkDestroy');
+
+        $ids = $validatedData['ids'] ?? [];
+        if (empty($ids)) {
+            return $this->response($request, [], Response::HTTP_BAD_REQUEST, ['message' => 'ids is required']);
+        }
+
+        $this->model::whereIn('id', $ids)->delete();
+
+        $this->callHook('afterBulkDestroy');
+
         return $this->response($request, ['message' => 'data deleted sucessfully'], Response::HTTP_OK);
     }
 
