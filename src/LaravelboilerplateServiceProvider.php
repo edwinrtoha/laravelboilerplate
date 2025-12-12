@@ -26,9 +26,9 @@ class LaravelboilerplateServiceProvider extends ServiceProvider
     /**
      * Returns existing migration file if found, else uses the current timestamp.
      */
-    protected function getMigrationFileName(string $migrationFileName): string
+    protected function getMigrationFileName(string $migrationFileName, int $offset = 0): string
     {
-        $timestamp = date('Y_m_d_His');
+        $timestamp = date('Y_m_d_His', time() + $offset);
 
         $filesystem = $this->app->make(Filesystem::class);
 
@@ -51,14 +51,14 @@ class LaravelboilerplateServiceProvider extends ServiceProvider
 
         $this->publishes([
             __DIR__.'/database/migrations/create_endpoint_has_permissions_table.php.stub' => $this->getMigrationFileName('create_endpoint_has_permissions_table.php'),
-            __DIR__.'/database/migrations/create_workflows_table.php.stub' => $this->getMigrationFileName('create_workflows_table.php'),
-            __DIR__.'/database/migrations/create_workflow_states_table.php.stub' => $this->getMigrationFileName('create_workflow_states_table.php'),
-            __DIR__.'/database/migrations/create_workflow_transitions_table.php.stub' => $this->getMigrationFileName('create_workflow_transitions_table.php'),
-            __DIR__.'/database/migrations/create_workflow_histories_table.php.stub' => $this->getMigrationFileName('create_workflow_histories_table.php'),
-            __DIR__.'/database/migrations/set_nullable_to_field_from_state_id_in_workflow_transitions_table.php.stub' => $this->getMigrationFileName('set_nullable_to_field_from_state_id_in_workflow_transitions_table.php'),
-            __DIR__.'/database/migrations/add_notes_to_workflow_histories_table.php.stub' => $this->getMigrationFileName('add_notes_to_workflow_histories_table.php'),
-            __DIR__.'/database/migrations/add_idx_to_workflow_transitions_table.php.stub' => $this->getMigrationFileName('add_idx_to_workflow_transitions_table.php'),
-            __DIR__.'/database/migrations/create_workflow_transition_permissions_table.php.stub' => $this->getMigrationFileName('create_workflow_transition_permissions_table.php'),
+            __DIR__.'/database/migrations/create_workflows_table.php.stub' => $this->getMigrationFileName('create_workflows_table.php', 1),
+            __DIR__.'/database/migrations/create_workflow_states_table.php.stub' => $this->getMigrationFileName('create_workflow_states_table.php', 2),
+            __DIR__.'/database/migrations/create_workflow_transitions_table.php.stub' => $this->getMigrationFileName('create_workflow_transitions_table.php', 3),
+            __DIR__.'/database/migrations/create_workflow_histories_table.php.stub' => $this->getMigrationFileName('create_workflow_histories_table.php', 4),
+            __DIR__.'/database/migrations/set_nullable_to_field_from_state_id_in_workflow_transitions_table.php.stub' => $this->getMigrationFileName('set_nullable_to_field_from_state_id_in_workflow_transitions_table.php', 5),
+            __DIR__.'/database/migrations/add_notes_to_workflow_histories_table.php.stub' => $this->getMigrationFileName('add_notes_to_workflow_histories_table.php', 6),
+            __DIR__.'/database/migrations/add_idx_to_workflow_transitions_table.php.stub' => $this->getMigrationFileName('add_idx_to_workflow_transitions_table.php', 7),
+            __DIR__.'/database/migrations/create_workflow_transition_permissions_table.php.stub' => $this->getMigrationFileName('create_workflow_transition_permissions_table.php', 8),
         ], 'endpoint-has-permissions-migrations');
     }
 }
