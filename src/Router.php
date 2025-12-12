@@ -26,7 +26,7 @@ class Router
         $this->controller = $controller;
         Route::group(['prefix' => $this->prefix], function () use ($login, $before, $after, $custom) {
             if ($before != null) {
-                $before();
+                $before($this);
             }
             if ($custom == null) {
                 $this->generate('get', '/', $this->controller, 'index', login: in_array('index', $login) || in_array('*', $login));
@@ -46,9 +46,11 @@ class Router
                 $this->generate('post', '/{id}', $this->controller, 'update', login: in_array('update', $login) || in_array('*', $login));
                 $this->generate('delete', '/{id}', $this->controller, 'destroy', login: in_array('destroy', $login) || in_array('*', $login));
 
+            } else {
+                $custom($this);
             }
             if ($after != null) {
-                $after();
+                $after($this);
             }
         });
     }
