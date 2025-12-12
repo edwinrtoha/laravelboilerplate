@@ -2,14 +2,15 @@
 namespace Edwinrtoha\Laravelboilerplate;
 
 use Edwinrtoha\Laravelboilerplate\Http\Controllers\ApiController;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Route;
 
 class Router
 {
-    var $prefix = '';
-    var $controller = ApiController::class;
+    public string $prefix = '';
+    public string $controller = ApiController::class;
 
-    public function generate($method, $path, $controller, $func, $middleware = [], $login = false)
+    public function generate(string $method, string $path, string $controller, string $func, array $middleware = [], bool $login = false)
     {
         $router = Route::$method($path, [$controller, $func])->middleware($middleware);
         if ($login) {
@@ -18,7 +19,8 @@ class Router
 
         return $router;
     }
-    public function generateGroup($prefix = '', $controller, $login = [], callable $before = null, callable $after = null, callable $custom = null)
+
+    public function generateGroup(string $prefix = '', string $controller, array $login = [], callable $before = null, callable $after = null, callable $custom = null)
     {
         $this->prefix = $prefix;
         $this->controller = $controller;
@@ -31,7 +33,8 @@ class Router
                 $this->generate('post', '/', $this->controller, 'store', login: in_array('store', $login) || in_array('*', $login));
                 
                 $controllerInstance = new $this->controller;
-                if (in_array('Illuminate\Database\Eloquent\SoftDeletes', class_uses($controllerInstance->model))) {
+                // Use class_uses_recursive to check for SoftDeletes trait in parent classes as well
+                if (in_array(SoftDeletes::class, class_uses_recursive($controllerInstance->model))) {
                     Route::group(['prefix' => 'trash'], function () use ($login) {
                         $this->generate('get', '/', $this->controller, 'trashed', login: in_array('trashed', $login) || in_array('*', $login));
                         $this->generate('get', '/{id}/restore', $this->controller, 'restore', login: in_array('restore', $login) || in_array('*', $login));
