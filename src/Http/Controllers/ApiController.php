@@ -1,4 +1,5 @@
 <?php
+
 namespace Edwinrtoha\Laravelboilerplate\Http\Controllers;
 
 use App\Http\Controllers\Controller;
@@ -51,7 +52,7 @@ class ApiController extends Controller
                     return ApiController::response([], 404, $e->getMessage());
                 }
                 return $next($request);
-            },    
+            },
         ];
     }
 
@@ -71,7 +72,8 @@ class ApiController extends Controller
         }
     }
 
-    public function getValidationRules($action) {
+    public function getValidationRules($action)
+    {
         $rules = [];
         if ($action == 'store' && !empty($this->storeValidateRequest)) {
             $rules = $this->storeValidateRequest;
@@ -90,13 +92,13 @@ class ApiController extends Controller
         return $rules;
     }
 
-    public function validateRequest(Request $request, string $action = null) {
+    public function validateRequest(Request $request, string $action = null)
+    {
         $rules = $this->getValidationRules($action);
 
         if (!empty($rules)) {
             $this->validatedData = $request->validate($rules);
-        }
-        else {
+        } else {
             $this->validatedData = $request->all();
         }
 
@@ -106,7 +108,8 @@ class ApiController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function queryModifier() {
+    public function queryModifier()
+    {
         return $this->instance;
     }
 
@@ -116,7 +119,8 @@ class ApiController extends Controller
         return $query;
     }
 
-    public function response(Request $request, $data = [], $status = Response::HTTP_OK, $errors = null, $message = null) {
+    public function response(Request $request, $data = [], $status = Response::HTTP_OK, $errors = null, $message = null)
+    {
         // check $data is paginate or not
         if ($data instanceof LengthAwarePaginator) {
             $params = [];
@@ -127,7 +131,7 @@ class ApiController extends Controller
                 $params[] = "{$key}=" . urlencode($value);
             }
             $params = implode('&', $params);
-            
+
             $metadata = [
                 'total' => $data->total(),
                 'per_page' => $data->perPage(),
@@ -137,14 +141,12 @@ class ApiController extends Controller
                 'prev_page_url' => $data->previousPageUrl() ? $data->previousPageUrl() . '&' . $params : null,
             ];
             $items = $data->items();
-        }
-        else {
+        } else {
             $isArray = function () use ($data) {
                 foreach ($data as $element) {
                     if (is_array($element)) {
                         return true;
-                    }
-                    else {
+                    } else {
                         return false;
                     }
                 }
@@ -159,8 +161,7 @@ class ApiController extends Controller
                     'next_page_url' => null,
                     'prev_page_url' => null,
                 ];
-            }
-            else {
+            } else {
                 $metadata = [
                     'total' => 1,
                     'per_page' => 1,
@@ -198,7 +199,7 @@ class ApiController extends Controller
         }
 
         foreach ($this->keyword_field as $field) {
-            $this->instance = $this->instance->where(function($query) use ($field, $request) {
+            $this->instance = $this->instance->where(function ($query) use ($field, $request) {
                 foreach (explode(' ', $request->input('keyword')) as $keyword) {
                     $query->orWhere($field, 'LIKE', "%{$keyword}%");
                 }
@@ -208,8 +209,7 @@ class ApiController extends Controller
         // Fetch all results
         if ($this->paginate == 0 || $this->paginate == null) {
             $results = $this->instance->with($this->withs)->get();
-        }
-        else {
+        } else {
             $results = $this->instance->with($this->withs)->paginate($this->paginate);
         }
 
@@ -251,12 +251,12 @@ class ApiController extends Controller
         $this->callHook('afterValidate');
 
         $this->callHook('beforeCreate');
-        
+
         // Create a new result
         $result = $this->model::create($validatedData);
 
         $this->callHook('afterCreate');
-        
+
         if ($validatedDataArray != []) {
             foreach ($validatedDataArray as $key => $value) {
                 if (is_array($value)) {
@@ -268,7 +268,7 @@ class ApiController extends Controller
                 }
             }
         }
-        
+
         $result = $this->model::with($this->withs)->find($result->id);
 
         // Return response
