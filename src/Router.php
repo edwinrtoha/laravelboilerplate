@@ -1,4 +1,5 @@
 <?php
+
 namespace Edwinrtoha\Laravelboilerplate;
 
 use Edwinrtoha\Laravelboilerplate\Http\Controllers\ApiController;
@@ -34,7 +35,7 @@ class Router
             if ($custom == null) {
                 $this->generate('get', '/', $this->controller, 'index', login: in_array('index', $login) || in_array('*', $login), permission: $permission['index'] ?? null);
                 $this->generate('post', '/', $this->controller, 'store', login: in_array('store', $login) || in_array('*', $login), permission: $permission['store'] ?? null);
-                
+
                 $controllerInstance = new $this->controller;
                 // Use class_uses_recursive to check for SoftDeletes trait in parent classes as well
                 if (in_array(SoftDeletes::class, class_uses_recursive($controllerInstance->model))) {
@@ -48,7 +49,6 @@ class Router
                 $this->generate('get', '/{id}', $this->controller, 'show', login: in_array('show', $login) || in_array('*', $login), permission: $permission['show'] ?? null);
                 $this->generate('post', '/{id}', $this->controller, 'update', login: in_array('update', $login) || in_array('*', $login), permission: $permission['update'] ?? null);
                 $this->generate('delete', '/{id}', $this->controller, 'destroy', login: in_array('destroy', $login) || in_array('*', $login), permission: $permission['destroy'] ?? null);
-
             } else {
                 $custom($this);
             }
