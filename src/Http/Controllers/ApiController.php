@@ -198,12 +198,20 @@ class ApiController extends Controller
             }
         }
 
-        foreach ($this->keyword_field as $field) {
-            $this->instance = $this->instance->where(function ($query) use ($field, $request) {
-                foreach (explode(' ', $request->input('keyword')) as $keyword) {
-                    $query->orWhere($field, 'LIKE', "%{$keyword}%");
-                }
-            });
+        if ($request->has('keyword')) {
+            $keywords = array_filter(explode(' ', $request->input('keyword')));
+
+            if (!empty($this->keyword_field) && !empty($keywords)) {
+                $this->instance = $this->instance->where(function ($query) use ($keywords) {
+                    foreach ($this->keyword_field as $field) {
+                        $query->orWhere(function ($subQuery) use ($field, $keywords) {
+                            foreach ($keywords as $keyword) {
+                                $subQuery->orWhere($field, 'LIKE', "%{$keyword}%");
+                            }
+                        });
+                    }
+                });
+            }
         }
 
         // Fetch all results
