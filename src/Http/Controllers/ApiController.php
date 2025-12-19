@@ -27,13 +27,13 @@ class ApiController extends Controller
     var $keyword_field = [];
     var $filter_validated = [];
 
-    protected function callHook(string $hook): void
+    protected function callHook(string $hook, array $params = []): void
     {
         if (! method_exists($this, $hook)) {
             return;
         }
 
-        $this->{$hook}();
+        call_user_func_array([$this, $hook], $params);
     }
 
     public static function middleware()
@@ -248,7 +248,7 @@ class ApiController extends Controller
             return $this->response($request, [], Response::HTTP_BAD_REQUEST, $e->errors());
         }
 
-        $this->callHook('afterValidate');
+        $this->callHook('afterValidate', [&$validatedData]);
 
         return DB::transaction(function () use ($request, $validatedData) {
             $modelData = [];
@@ -262,18 +262,18 @@ class ApiController extends Controller
                 }
             }
 
-            $this->callHook('afterValidate');
+            $this->callHook('beforeCreate', [&$modelData]);
 
             // Create a new result
             $result = $this->model::create($modelData);
 
-            $this->callHook('afterCreate');
+            $this->callHook('afterCreate', [&$result]);
 
             foreach ($relationData as $relation => $items) {
                 foreach ($items as $item) {
-                    $this->callHook('beforeCreateRelationalData');
+                    $this->callHook('beforeCreateRelationalData', [&$item, $relation]);
                     $result->{$relation}()->create($item);
-                    $this->callHook('afterCreateRelationalData');
+                    $this->callHook('afterCreateRelationalData', [$relation, $item]);
                 }
             }
 
