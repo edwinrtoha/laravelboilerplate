@@ -8,6 +8,7 @@ use Edwinrtoha\Laravelboilerplate\Models\EndpointHasPermission;
 use Edwinrtoha\Laravelboilerplate\Models\ModelStd;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class ApiController extends Controller
@@ -247,40 +248,40 @@ class ApiController extends Controller
             return $this->response($request, [], Response::HTTP_BAD_REQUEST, $e->errors());
         }
 
-        $validatedDataArray = [];
-        $validatedData = array_filter($validatedData, function ($value, $key) use (&$validatedDataArray) {
-            if (is_array($value)) {
-                $validatedDataArray[$key] = $value;
-                return false;
-            }
-            return true;
-        }, ARRAY_FILTER_USE_BOTH);
-
         $this->callHook('afterValidate');
 
-        $this->callHook('beforeCreate');
+        return DB::transaction(function () use ($request, $validatedData) {
+            $modelData = [];
+            $relationData = [];
 
-        // Create a new result
-        $result = $this->model::create($validatedData);
-
-        $this->callHook('afterCreate');
-
-        if ($validatedDataArray != []) {
-            foreach ($validatedDataArray as $key => $value) {
+            foreach ($validatedData as $key => $value) {
                 if (is_array($value)) {
-                    foreach ($value as $item) {
-                        $this->callHook('beforeCreateRelationalData');
-                        $result->$key()->create($item);
-                        $this->callHook('afterCreateRelationalData');
-                    }
+                    $relationData[$key] = $value;
+                } else {
+                    $modelData[$key] = $value;
                 }
             }
-        }
 
-        $result = $this->model::with($this->withs)->find($result->id);
+            $this->callHook('afterValidate');
 
-        // Return response
-        return $this->response($request, $result, Response::HTTP_CREATED);
+            // Create a new result
+            $result = $this->model::create($modelData);
+
+            $this->callHook('afterCreate');
+
+            foreach ($relationData as $relation => $items) {
+                foreach ($items as $item) {
+                    $this->callHook('beforeCreateRelationalData');
+                    $result->{$relation}()->create($item);
+                    $this->callHook('afterCreateRelationalData');
+                }
+            }
+
+            $result = $result->fresh($this->withs);
+
+            // Return response
+            return $this->response($request, $result, Response::HTTP_CREATED);
+        });
     }
 
     /**
